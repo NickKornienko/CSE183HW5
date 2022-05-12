@@ -9,20 +9,36 @@ let init = (app) => {
 
     // This is the Vue data.
     app.data = {
-        // Complete as you see fit.
+        post_list: [],
+        new_post: "",
+    };
+
+    app.add_post = function () {
+        var post = {
+            content: app.vue.new_post,
+            poster: "placeholder"
+        };
+
+        app.vue.post_list.push(post);
+        app.vue.new_post = "";
+    };
+
+    app.cancel_post = function () {
+        app.vue.new_post = "";
     };
 
     app.enumerate = (a) => {
         // This adds an _idx field to each element of the array.
         let k = 0;
-        a.map((e) => {e._idx = k++;});
+        a.map((e) => { e._idx = k++; });
         return a;
     };
 
 
     // This contains all the methods.
     app.methods = {
-        // Complete as you see fit.
+        add_post: app.add_post,
+        cancel_post: app.cancel_post
     };
 
     // This creates the Vue instance.

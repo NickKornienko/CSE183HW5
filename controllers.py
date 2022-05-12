@@ -29,14 +29,35 @@ from py4web import action, request, abort, redirect, URL
 from yatl.helpers import A
 from .common import db, session, T, cache, auth, logger, authenticated, unauthenticated, flash
 from py4web.utils.url_signer import URLSigner
-from .models import get_user_email
+from .models import get_user_email, get_user_name
 
 url_signer = URLSigner(session)
 
+
 @action('index')
-@action.uses(db, auth, 'index.html')
+@action.uses(db, auth.user, 'index.html', url_signer)
 def index():
     return dict(
-        # COMPLETE: return here any signed URLs you need.
-        my_callback_url = URL('my_callback', signer=url_signer),
+        my_callback_url=URL('my_callback', signer=url_signer),
     )
+
+
+@action('get_posts')
+@action.uses(url_signer.verify(), db)
+def get_posts():
+    return dict(posts=db(db.posts).select().as_list())
+
+
+@action('add_post', method='POST')
+@action.uses(url_signer.verify(), db, auth.user)
+def add_post():
+    user_email = get_user_email()
+    name = get_user_name()
+    content = request.json.get('content')
+    assert content is not None
+    db.posts.insert(
+        user_email=user_email,
+        name=name,
+        content=content
+    )
+    return "ok"

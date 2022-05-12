@@ -35,7 +35,7 @@ url_signer = URLSigner(session)
 
 
 @action('index')
-@action.uses(db, auth.user, 'index.html', url_signer)
+@action.uses('index.html', db, auth.user, url_signer)
 def index():
     return dict(
         my_callback_url=URL('my_callback', signer=url_signer),

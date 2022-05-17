@@ -38,26 +38,44 @@ url_signer = URLSigner(session)
 @action.uses('index.html', db, auth.user, url_signer)
 def index():
     return dict(
-        my_callback_url=URL('my_callback', signer=url_signer),
+        get_user_email_url=URL('get_current_user_email', signer=url_signer),
+        get_posts_url=URL('get_posts', signer=url_signer),
+        add_post_url=URL('add_post', signer=url_signer),
+        del_post_url=URL('del_post', signer=url_signer)
     )
 
 
 @action('get_posts')
 @action.uses(url_signer.verify(), db)
 def get_posts():
-    return dict(posts=db(db.posts).select().as_list())
+    posts = db(db.posts).select().as_list()
+    posts.reverse()
+    return dict(posts=posts)
+
+
+@action('get_current_user_email')
+@action.uses(url_signer.verify(), db)
+def get_current_user_email():
+    return dict(user_email=get_user_email())
 
 
 @action('add_post', method='POST')
 @action.uses(url_signer.verify(), db, auth.user)
 def add_post():
-    user_email = get_user_email()
     name = get_user_name()
     content = request.json.get('content')
     assert content is not None
     db.posts.insert(
-        user_email=user_email,
         name=name,
         content=content
     )
+    return "ok"
+
+
+@action('del_post', method='POST')
+@action.uses(url_signer.verify(), db, auth.user)
+def del_post():
+    post_id = request.json.get('post_id')
+    assert post_id is not None
+    db(db.posts.id == post_id).delete()
     return "ok"

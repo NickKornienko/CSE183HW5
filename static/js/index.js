@@ -9,22 +9,22 @@ let init = (app) => {
 
     // This is the Vue data.
     app.data = {
-        post_list: [],
+        user_email: "",
+        posts: [],
         new_post: "",
     };
 
     app.add_post = function () {
-        var post = {
-            content: app.vue.new_post,
-            poster: "placeholder"
-        };
-
-        app.vue.post_list.push(post);
+        axios.post(add_post_url, { content: app.vue.new_post });
         app.vue.new_post = "";
     };
 
     app.cancel_post = function () {
         app.vue.new_post = "";
+    };
+
+    app.del_post = function (post_id) {
+        axios.post(del_post_url, { post_id: post_id });
     };
 
     app.enumerate = (a) => {
@@ -38,7 +38,8 @@ let init = (app) => {
     // This contains all the methods.
     app.methods = {
         add_post: app.add_post,
-        cancel_post: app.cancel_post
+        cancel_post: app.cancel_post,
+        del_post: app.del_post
     };
 
     // This creates the Vue instance.
@@ -50,8 +51,20 @@ let init = (app) => {
 
     // And this initializes it.
     app.init = () => {
-        // Put here any initialization code.
-        // Typically this is a server GET call to load the data.
+        axios.get(get_user_email_url)
+            .then((result) => {
+                let user_email = result.data.user_email
+                app.vue.user_email = user_email
+            })
+
+        axios.get(get_posts_url)
+            .then((result) => {
+                let posts = result.data.posts;
+                app.vue.posts = posts;
+            })
+            .then(() => {
+                // TODO: Get like information
+            });
     };
 
     // Call to the initializer.

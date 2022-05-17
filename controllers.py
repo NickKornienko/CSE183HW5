@@ -41,7 +41,10 @@ def index():
         get_user_email_url=URL('get_current_user_email', signer=url_signer),
         get_posts_url=URL('get_posts', signer=url_signer),
         add_post_url=URL('add_post', signer=url_signer),
-        del_post_url=URL('del_post', signer=url_signer)
+        del_post_url=URL('del_post', signer=url_signer),
+        get_likes_url=URL('get_likes', signer=url_signer),
+        like_post_url=URL('like_post', signer=url_signer),
+        dislike_post_url=URL('dislike_post', signer=url_signer)
     )
 
 
@@ -51,6 +54,57 @@ def get_posts():
     posts = db(db.posts).select().as_list()
     posts.reverse()
     return dict(posts=posts)
+
+
+@action('get_likes')
+@action.uses(url_signer.verify(), db)
+def get_likes():
+    post_id = request.params.get('post_id')
+    assert post_id is not None
+    likes = db(db.likes.post_id == post_id).select().as_list()
+    return dict(likes=likes)
+
+
+@action('like_post', method='POST')
+@action.uses(url_signer.verify(), db, auth.user)
+def like_post():
+    post_id = request.json.get('post_id')
+    remove = request.json.get('remove')
+    assert post_id is not None
+    assert remove is not None
+
+    if remove:
+        db(db.likes.post_id == post_id and db.likes.user_email ==
+           get_user_email() and db.likes.is_like == "true").delete()
+    else:
+        db.likes.insert(
+            post_id=post_id,
+            name=get_user_name(),
+            is_like="true"
+        )
+
+    return "ok"
+
+
+@action('dislike_post', method='POST')
+@action.uses(url_signer.verify(), db, auth.user)
+def dislike_post():
+    post_id = request.json.get('post_id')
+    remove = request.json.get('remove')
+    assert post_id is not None
+    assert remove is not None
+
+    if remove:
+        db(db.likes.post_id == post_id and db.likes.user_email ==
+           get_user_email() and db.likes.is_like == "false").delete()
+    else:
+        db.likes.insert(
+            post_id=post_id,
+            name=get_user_name(),
+            is_like="false"
+        )
+
+    return "ok"
 
 
 @action('get_current_user_email')
@@ -78,4 +132,5 @@ def del_post():
     post_id = request.json.get('post_id')
     assert post_id is not None
     db(db.posts.id == post_id).delete()
+    db(db.likes.post_id == post_id).delete()
     return "ok"

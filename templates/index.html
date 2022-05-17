@@ -42,15 +42,19 @@
               <div class="columns">
 
                 <div class="column">
-                    <span class="icon">
-                      <i v-if="true" class="fa fa-fw fa-thumbs-o-up"></i>
-                      <i v-if="false" class="fa fa-fw fa-thumbs-up"></i>
-                    </span>
+                  <span class="icon">
+                    <i v-if="liked(post.id)" class="fa fa-fw fa-thumbs-up"
+                      @click="like_post(post.id, true)"></i>
+                    <i v-if="!liked(post.id)" class="fa fa-fw fa-thumbs-o-up"
+                      @click="like_post(post.id, false)"></i>
+                  </span>
 
-                    <span class="icon">
-                      <i v-if="true" class="fa fa-fw fa-thumbs-o-down"></i>
-                      <i v-if="false" class="fa fa-fw fa-thumbs-down"></i>
-                    </span>
+                  <span class="icon">
+                    <i v-if="disliked(post.id)" class="fa fa-fw fa-thumbs-down"
+                      @click="dislike_post(post.id, true)"></i>
+                    <i v-if="!disliked(post.id)" class="fa fa-fw fa-thumbs-o-down"
+                      @click="dislike_post(post.id, false)"></i>
+                  </span>
                 </div>
 
                 <div class="column">
@@ -91,6 +95,9 @@
   let add_post_url = "[[=XML(add_post_url)]]";
   let del_post_url = "[[=XML(del_post_url)]]";
   let get_user_email_url = "[[=XML(get_user_email_url)]]";
+  let get_likes_url = "[[=XML(get_likes_url)]]";
+  let like_post_url = "[[=XML(like_post_url)]]";
+  let dislike_post_url = "[[=XML(dislike_post_url)]]";
 </script>
 <script src="js/index.js"></script>
 [[end]]

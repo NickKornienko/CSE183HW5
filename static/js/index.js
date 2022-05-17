@@ -11,8 +11,47 @@ let init = (app) => {
     app.data = {
         user_email: "",
         posts: [],
+        post_likes: {},
         new_post: "",
+        test: ""
     };
+
+    app.liked = function (post_id) {
+        let likes = app.vue.post_likes[post_id];
+        console.log(app.vue.test);
+
+        if (!likes) {
+            return false;
+        }
+
+        for (let like of likes) {
+            if (like.user_email == app.vue.user_email) {
+                if (like.is_like) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+
+    app.disliked = function (post_id) {
+        let likes = app.vue.post_likes[post_id];
+        console.log(app.vue.test);
+
+        if (!likes) {
+            return false;
+        }
+
+        for (let like of likes) {
+            if (like.user_email == app.vue.user_email) {
+                if (!like.is_like) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+
 
     app.add_post = function () {
         axios.post(add_post_url, { content: app.vue.new_post });
@@ -27,6 +66,14 @@ let init = (app) => {
         axios.post(del_post_url, { post_id: post_id });
     };
 
+    app.like_post = function (post_id, is_toggled) {
+        axios.post(like_post_url, { post_id: post_id, remove: is_toggled });
+    };
+
+    app.dislike_post = function (post_id, is_toggled) {
+        axios.post(dislike_post_url, { post_id: post_id, remove: is_toggled });
+    };
+
     app.enumerate = (a) => {
         // This adds an _idx field to each element of the array.
         let k = 0;
@@ -39,7 +86,11 @@ let init = (app) => {
     app.methods = {
         add_post: app.add_post,
         cancel_post: app.cancel_post,
-        del_post: app.del_post
+        del_post: app.del_post,
+        like_post: app.like_post,
+        dislike_post: app.dislike_post,
+        liked: app.liked,
+        disliked: app.disliked
     };
 
     // This creates the Vue instance.
@@ -61,10 +112,16 @@ let init = (app) => {
             .then((result) => {
                 let posts = result.data.posts;
                 app.vue.posts = posts;
+
+                for (let post of app.vue.posts) {
+                    axios.get(get_likes_url, { params: { post_id: post.id } })
+                        .then((result) => {
+                            let likes = result.data.likes;
+                            app.vue.post_likes[post.id] = likes;
+                            app.vue.test = "filled";
+                        })
+                }
             })
-            .then(() => {
-                // TODO: Get like information
-            });
     };
 
     // Call to the initializer.

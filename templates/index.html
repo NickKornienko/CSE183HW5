@@ -43,10 +43,8 @@
 
                 <div class="column">
                   <span class="icon">
-                    <i v-if="liked(post.id)" class="fa fa-fw fa-thumbs-up"
-                      @click="like_post(post.id, true)"></i>
-                    <i v-if="!liked(post.id)" class="fa fa-fw fa-thumbs-o-up"
-                      @click="like_post(post.id, false)"></i>
+                    <i v-if="liked(post.id)" class="fa fa-fw fa-thumbs-up" @click="like_post(post.id, true)"></i>
+                    <i v-if="!liked(post.id)" class="fa fa-fw fa-thumbs-o-up" @click="like_post(post.id, false)"></i>
                   </span>
 
                   <span class="icon">
@@ -58,7 +56,8 @@
                 </div>
 
                 <div class="column">
-                  Like list
+                  {{get_post_like_names(post.id)}}
+                  {{get_post_dislike_names(post.id)}}
                 </div>
 
                 <div class="column">

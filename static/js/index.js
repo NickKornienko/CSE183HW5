@@ -12,13 +12,12 @@ let init = (app) => {
         user_email: "",
         posts: [],
         post_likes: {},
+        post_liked_by_user: {},
         new_post: "",
-        test: ""
     };
 
     app.liked = function (post_id) {
         let likes = app.vue.post_likes[post_id];
-        console.log(app.vue.test);
 
         if (!likes) {
             return false;
@@ -26,7 +25,7 @@ let init = (app) => {
 
         for (let like of likes) {
             if (like.user_email == app.vue.user_email) {
-                if (like.is_like) {
+                if (like.is_like == "true") {
                     return true;
                 }
             }
@@ -36,7 +35,6 @@ let init = (app) => {
 
     app.disliked = function (post_id) {
         let likes = app.vue.post_likes[post_id];
-        console.log(app.vue.test);
 
         if (!likes) {
             return false;
@@ -44,7 +42,7 @@ let init = (app) => {
 
         for (let like of likes) {
             if (like.user_email == app.vue.user_email) {
-                if (!like.is_like) {
+                if (like.is_like == "false") {
                     return true;
                 }
             }
@@ -118,7 +116,6 @@ let init = (app) => {
                         .then((result) => {
                             let likes = result.data.likes;
                             app.vue.post_likes[post.id] = likes;
-                            app.vue.test = "filled";
                         })
                 }
             })

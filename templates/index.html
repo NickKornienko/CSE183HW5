@@ -13,23 +13,30 @@
     Postlandia
   </div>
 
-  <div class="block">
-    <div class="field">
-      <p class="control">
-        <textarea class="textarea" placeholder="Type your post here" v-model="new_post"></textarea>
-      </p>
+  <i v-if="post_open">
+    <div class="block">
+      <div class="field">
+        <p class="control">
+          <textarea class="textarea" placeholder="Type your post here" v-model="new_post"></textarea>
+        </p>
+      </div>
+      <button class="button is-primary" @click="add_post()">Post</button>
+      <button class="button is-warning" @click="cancel_post()">Cancel</button>
     </div>
-    <button class="button is-primary" @click="add_post()">Post</button>
-    <button class="button is-warning" @click="cancel_post()">Cancel</button>
-  </div>
+  </i>
+
+  <i v-if="!post_open">
+    <div class="block">
+      <button class="button is-primary" @click="open_post()"><i class="fa fa-fw fa-plus"></i></button>
+    </div>
+  </i>
 
   <div class="container is-widescreen">
     <div class="rows">
 
-      <div v-for="post in posts" class="block">
-        <div class="box">
+      <div v-for="post in posts.slice().reverse()" class="block">
+        <div class="box" @mouseover="get_post_like_names(post.id)">
           <div class="rows">
-
             <div class="row">
               {{post.content}}
             </div>
@@ -43,21 +50,23 @@
 
                 <div class="column">
                   <span class="icon">
-                    <i v-if="liked(post.id)" class="fa fa-fw fa-thumbs-up" @click="like_post(post.id, true)"></i>
-                    <i v-if="!liked(post.id)" class="fa fa-fw fa-thumbs-o-up" @click="like_post(post.id, false)"></i>
+                    <i v-if="post_liked_by_user[post.id]" class="fa fa-fw fa-thumbs-up"
+                      @click="like_post(post.id, true)"></i>
+                    <i v-if="!post_liked_by_user[post.id]" class="fa fa-fw fa-thumbs-o-up"
+                      @click="like_post(post.id, false)"></i>
                   </span>
 
                   <span class="icon">
-                    <i v-if="disliked(post.id)" class="fa fa-fw fa-thumbs-down"
+                    <i v-if="post_disliked_by_user[post.id]" class="fa fa-fw fa-thumbs-down"
                       @click="dislike_post(post.id, true)"></i>
-                    <i v-if="!disliked(post.id)" class="fa fa-fw fa-thumbs-o-down"
+                    <i v-if="!post_disliked_by_user[post.id]" class="fa fa-fw fa-thumbs-o-down"
                       @click="dislike_post(post.id, false)"></i>
                   </span>
                 </div>
 
                 <div class="column">
-                  {{get_post_like_names(post.id)}}
-                  {{get_post_dislike_names(post.id)}}
+                  {{post_like_names[post.id]}}
+                  {{post_dislike_names[post.id]}}
                 </div>
 
                 <div class="column">
@@ -76,15 +85,6 @@
       </div>
     </div>
   </div>
-
-  <!-- <div id="posts" class="block">
-    <div class="card">
-      <div v-for="post in post_list" class="block">
-        {{post}}
-      </div>
-    </div>
-  </div> -->
-
 </div>
 
 [[block page_scripts]]
@@ -94,6 +94,7 @@
   let add_post_url = "[[=XML(add_post_url)]]";
   let del_post_url = "[[=XML(del_post_url)]]";
   let get_user_email_url = "[[=XML(get_user_email_url)]]";
+  let get_user_name_url = "[[=XML(get_user_name_url)]]";
   let get_likes_url = "[[=XML(get_likes_url)]]";
   let like_post_url = "[[=XML(like_post_url)]]";
   let dislike_post_url = "[[=XML(dislike_post_url)]]";

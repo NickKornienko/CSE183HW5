@@ -10,50 +10,49 @@ let init = (app) => {
     // This is the Vue data.
     app.data = {
         user_email: "",
+        user_name: "",
         posts: [],
         post_likes: {},
         new_post: "",
+        post_open: false,
+        temp_id: -1,
+        post_liked_by_user: {},
+        post_disliked_by_user: {},
+        post_like_names: {},
+        post_dislike_names: {}
     };
 
     app.liked = function (post_id) {
         let likes = app.vue.post_likes[post_id];
 
-        if (!likes) {
-            return false;
-        }
+        let is_liked = false;
+        let is_disliked = false;
 
-        for (let like of likes) {
-            if (like.user_email == app.vue.user_email) {
-                if (like.is_like == "true") {
-                    return true;
+        if (likes) {
+            for (let like of likes) {
+                if (like.user_email == app.vue.user_email) {
+                    if (like.is_like == "true") {
+                        is_liked = true;
+                    }
+                    else {
+                        is_disliked = true;
+                    }
                 }
             }
         }
-        return false;
-    };
 
-    app.disliked = function (post_id) {
-        let likes = app.vue.post_likes[post_id];
-
-        if (!likes) {
-            return "false";
-        }
-
-        for (let like of likes) {
-            if (like.user_email == app.vue.user_email) {
-                if (like.is_like == "false") {
-                    return true;
-                }
-            }
-        }
-        return false;
+        app.vue.post_liked_by_user[post_id] = is_liked;
+        app.vue.post_disliked_by_user[post_id] = is_disliked;
     };
 
     app.get_post_like_names = function (post_id) {
+        app.get_post_dislike_names(post_id);
+
         let likes = app.vue.post_likes[post_id];
 
         if (!likes) {
-            return "";
+            app.vue.post_like_names[post_id] = "";
+            return;
         }
 
         let post_like_names = "Liked by ";
@@ -70,10 +69,11 @@ let init = (app) => {
         }
 
         if (post_like_names == "Liked by ") {
-            return "";
+            app.vue.post_like_names[post_id] = "";
+            return;
         }
 
-        return post_like_names;
+        app.vue.post_like_names[post_id] = post_like_names;
     }
 
     app.get_post_dislike_names = function (post_id) {
@@ -105,24 +105,65 @@ let init = (app) => {
 
 
     app.add_post = function () {
-        axios.post(add_post_url, { content: app.vue.new_post });
+        axios.post(add_post_url, { content: app.vue.new_post, temp_id: app.vue.temp_id });
+
+        let post = {
+            content: app.vue.new_post,
+            id: app.vue.temp_id--,
+            name: app.vue.user_name,
+            user_email: app.vue.user_email
+        };
+
+        app.vue.posts.push(post);
         app.vue.new_post = "";
     };
 
     app.cancel_post = function () {
+        app.vue.post_open = false;
         app.vue.new_post = "";
     };
 
+    app.open_post = function () {
+        app.vue.post_open = true;
+    }
+
     app.del_post = function (post_id) {
         axios.post(del_post_url, { post_id: post_id });
+        for (let i = 0; i < app.vue.posts.length; i++) {
+            if (app.vue.posts[i].id == post_id) {
+                app.vue.posts.splice(i, 1);
+            }
+        }
     };
 
     app.like_post = function (post_id, is_toggled) {
         axios.post(like_post_url, { post_id: post_id, remove: is_toggled });
+
+        let like = {
+            id: null,
+            is_like: "true",
+            name: app.vue.user_name,
+            user_email: app.vue.user_email,
+            post_id: post_id
+        };
+
+        app.vue.post_likes[post_id].push(like);
+        app.liked(post_id);
     };
 
     app.dislike_post = function (post_id, is_toggled) {
         axios.post(dislike_post_url, { post_id: post_id, remove: is_toggled });
+
+        let like = {
+            id: null,
+            is_like: "false",
+            name: app.vue.user_name,
+            user_email: app.vue.user_email,
+            post_id: post_id
+        };
+
+        app.vue.post_likes[post_id].push(like);
+        app.liked(post_id);
     };
 
     app.enumerate = (a) => {
@@ -137,11 +178,11 @@ let init = (app) => {
     app.methods = {
         add_post: app.add_post,
         cancel_post: app.cancel_post,
+        open_post: app.open_post,
         del_post: app.del_post,
         like_post: app.like_post,
         dislike_post: app.dislike_post,
         liked: app.liked,
-        disliked: app.disliked,
         get_post_like_names: app.get_post_like_names,
         get_post_dislike_names: app.get_post_dislike_names
     };
@@ -157,20 +198,30 @@ let init = (app) => {
     app.init = () => {
         axios.get(get_user_email_url)
             .then((result) => {
-                let user_email = result.data.user_email
-                app.vue.user_email = user_email
+                let user_email = result.data.user_email;
+                app.vue.user_email = user_email;
+            })
+
+        axios.get(get_user_name_url)
+            .then((result) => {
+                let user_name = result.data.user_name;
+                app.vue.user_name = user_name;
             })
 
         axios.get(get_posts_url)
             .then((result) => {
                 let posts = result.data.posts;
                 app.vue.posts = posts;
-
+            })
+            .then(() => {
                 for (let post of app.vue.posts) {
                     axios.get(get_likes_url, { params: { post_id: post.id } })
                         .then((result) => {
                             let likes = result.data.likes;
                             app.vue.post_likes[post.id] = likes;
+                        })
+                        .then(() => {
+                            app.liked(post.id);
                         })
                 }
             })

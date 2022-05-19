@@ -37,8 +37,11 @@ url_signer = URLSigner(session)
 @action('index')
 @action.uses('index.html', db, auth.user, url_signer)
 def index():
+    db(db.posts.user_email == get_user_email()).update(temp_id="None")
+
     return dict(
         get_user_email_url=URL('get_current_user_email', signer=url_signer),
+        get_user_name_url=URL('get_current_user_name', signer=url_signer),
         get_posts_url=URL('get_posts', signer=url_signer),
         add_post_url=URL('add_post', signer=url_signer),
         del_post_url=URL('del_post', signer=url_signer),
@@ -52,7 +55,6 @@ def index():
 @action.uses(url_signer.verify(), db)
 def get_posts():
     posts = db(db.posts).select().as_list()
-    posts.reverse()
     return dict(posts=posts)
 
 
@@ -73,11 +75,15 @@ def like_post():
     assert post_id is not None
     assert remove is not None
 
+    if post_id < 0:
+        post_id = db(db.posts.temp_id == post_id).select(db.posts.id)[0].id
+
     if remove:
         db(db.likes.post_id == post_id and db.likes.user_email ==
            get_user_email() and db.likes.is_like == "true").delete()
     else:
-        db.likes.insert(
+        db.likes.update_or_insert(
+            (db.likes.post_id == post_id),
             post_id=post_id,
             name=get_user_name(),
             is_like="true"
@@ -94,11 +100,15 @@ def dislike_post():
     assert post_id is not None
     assert remove is not None
 
+    if post_id < 0:
+        post_id = db(db.posts.temp_id == post_id).select(db.posts.id)[0].id
+
     if remove:
         db(db.likes.post_id == post_id and db.likes.user_email ==
            get_user_email() and db.likes.is_like == "false").delete()
     else:
-        db.likes.insert(
+        db.likes.update_or_insert(
+            (db.likes.post_id == post_id),
             post_id=post_id,
             name=get_user_name(),
             is_like="false"
@@ -113,15 +123,24 @@ def get_current_user_email():
     return dict(user_email=get_user_email())
 
 
+@action('get_current_user_name')
+@action.uses(url_signer.verify(), db)
+def get_current_user_name():
+    return dict(user_name=get_user_name())
+
+
 @action('add_post', method='POST')
 @action.uses(url_signer.verify(), db, auth.user)
 def add_post():
     name = get_user_name()
     content = request.json.get('content')
+    temp_id = request.json.get('temp_id')
+
     assert content is not None
     db.posts.insert(
         name=name,
-        content=content
+        content=content,
+        temp_id=temp_id
     )
     return "ok"
 
@@ -131,6 +150,10 @@ def add_post():
 def del_post():
     post_id = request.json.get('post_id')
     assert post_id is not None
+
+    if post_id < 0:
+        post_id = db(db.posts.temp_id == post_id).select(db.posts.id)[0].id
+
     db(db.posts.id == post_id).delete()
     db(db.likes.post_id == post_id).delete()
     return "ok"

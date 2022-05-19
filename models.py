@@ -24,6 +24,7 @@ db.define_table(
     Field('user_email', default=get_user_email),
     Field('name', requires=IS_NOT_EMPTY()),
     Field('content', requires=IS_NOT_EMPTY()),
+    Field('temp_id', requires=IS_NOT_EMPTY())
 )
 
 db.define_table(
@@ -31,7 +32,7 @@ db.define_table(
     Field('post_id', requires=IS_NOT_EMPTY()),
     Field('user_email', default=get_user_email),
     Field('name', requires=IS_NOT_EMPTY()),
-    Field('is_like', requires=IS_NOT_EMPTY()),
+    Field('is_like', requires=IS_NOT_EMPTY())
 )
 
 db.commit()

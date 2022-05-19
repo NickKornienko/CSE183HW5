@@ -139,30 +139,52 @@ let init = (app) => {
     app.like_post = function (post_id, is_toggled) {
         axios.post(like_post_url, { post_id: post_id, remove: is_toggled });
 
-        let like = {
-            id: null,
-            is_like: "true",
-            name: app.vue.user_name,
-            user_email: app.vue.user_email,
-            post_id: post_id
-        };
+        if (is_toggled) {
+            let likes = app.vue.post_likes[post_id];
+            for (let i = 0; i < likes.length; i++) {
+                if (likes[i].post_id == post_id) {
+                    likes.splice(i, 1);
+                }
+            }
+        }
+        else {
+            let like = {
+                id: null,
+                is_like: "true",
+                name: app.vue.user_name,
+                user_email: app.vue.user_email,
+                post_id: post_id
+            };
 
-        app.vue.post_likes[post_id].push(like);
+            app.vue.post_likes[post_id].push(like);
+        }
+
         app.liked(post_id);
     };
 
     app.dislike_post = function (post_id, is_toggled) {
         axios.post(dislike_post_url, { post_id: post_id, remove: is_toggled });
 
-        let like = {
-            id: null,
-            is_like: "false",
-            name: app.vue.user_name,
-            user_email: app.vue.user_email,
-            post_id: post_id
-        };
+        if (is_toggled) {
+            let likes = app.vue.post_likes[post_id];
+            for (let i = 0; i < likes.length; i++) {
+                if (likes[i].post_id == post_id) {
+                    likes.splice(i, 1);
+                }
+            }
+        }
+        else {
+            let like = {
+                id: null,
+                is_like: "false",
+                name: app.vue.user_name,
+                user_email: app.vue.user_email,
+                post_id: post_id
+            };
 
-        app.vue.post_likes[post_id].push(like);
+            app.vue.post_likes[post_id].push(like);
+        }
+
         app.liked(post_id);
     };
 

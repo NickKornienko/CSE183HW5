@@ -19,7 +19,7 @@ let init = (app) => {
         post_liked_by_user: {},
         post_disliked_by_user: {},
         post_like_names: {},
-        post_dislike_names: {}
+        post_dislike_names: {},
     };
 
     app.liked = function (post_id) {
@@ -40,9 +40,8 @@ let init = (app) => {
                 }
             }
         }
-
-        app.vue.post_liked_by_user[post_id] = is_liked;
-        app.vue.post_disliked_by_user[post_id] = is_disliked;
+        Vue.set(app.vue.post_liked_by_user, post_id, is_liked);
+        Vue.set(app.vue.post_disliked_by_user, post_id, is_disliked);
     };
 
     app.get_post_like_names = function (post_id) {
@@ -139,15 +138,14 @@ let init = (app) => {
     app.like_post = function (post_id, is_toggled) {
         axios.post(like_post_url, { post_id: post_id, remove: is_toggled });
 
-        if (is_toggled) {
-            let likes = app.vue.post_likes[post_id];
-            for (let i = 0; i < likes.length; i++) {
-                if (likes[i].post_id == post_id) {
-                    likes.splice(i, 1);
-                }
+        let likes = app.vue.post_likes[post_id];
+        for (let i = 0; i < likes.length; i++) {
+            if (likes[i].post_id == post_id) {
+                likes.splice(i, 1);
             }
         }
-        else {
+
+        if (!is_toggled) {
             let like = {
                 id: null,
                 is_like: "true",
@@ -165,15 +163,14 @@ let init = (app) => {
     app.dislike_post = function (post_id, is_toggled) {
         axios.post(dislike_post_url, { post_id: post_id, remove: is_toggled });
 
-        if (is_toggled) {
-            let likes = app.vue.post_likes[post_id];
-            for (let i = 0; i < likes.length; i++) {
-                if (likes[i].post_id == post_id) {
-                    likes.splice(i, 1);
-                }
+        let likes = app.vue.post_likes[post_id];
+        for (let i = 0; i < likes.length; i++) {
+            if (likes[i].post_id == post_id) {
+                likes.splice(i, 1);
             }
         }
-        else {
+
+        if (!is_toggled) {
             let like = {
                 id: null,
                 is_like: "false",
@@ -236,13 +233,12 @@ let init = (app) => {
                 app.vue.posts = posts;
             })
             .then(() => {
+                let post_likes_temp = {};
                 for (let post of app.vue.posts) {
                     axios.get(get_likes_url, { params: { post_id: post.id } })
                         .then((result) => {
                             let likes = result.data.likes;
-                            app.vue.post_likes[post.id] = likes;
-                        })
-                        .then(() => {
+                            Vue.set(app.vue.post_likes, post.id, likes);
                             app.liked(post.id);
                         })
                 }

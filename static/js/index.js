@@ -138,6 +138,10 @@ let init = (app) => {
     app.like_post = function (post_id, is_toggled) {
         axios.post(like_post_url, { post_id: post_id, remove: is_toggled });
 
+        if (!app.vue.post_likes[post_id]) {
+            app.vue.post_likes[post_id] = [];
+        }
+
         let likes = app.vue.post_likes[post_id];
         for (let i = 0; i < likes.length; i++) {
             if (likes[i].post_id == post_id) {
@@ -162,6 +166,10 @@ let init = (app) => {
 
     app.dislike_post = function (post_id, is_toggled) {
         axios.post(dislike_post_url, { post_id: post_id, remove: is_toggled });
+
+        if (!app.vue.post_likes[post_id]) {
+            app.vue.post_likes[post_id] = [];
+        }
 
         let likes = app.vue.post_likes[post_id];
         for (let i = 0; i < likes.length; i++) {

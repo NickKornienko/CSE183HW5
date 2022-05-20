@@ -35,7 +35,7 @@
     <div class="rows">
 
       <div v-for="post in posts.slice().reverse()" class="block">
-        <div class="box" @mouseover="get_post_like_names(post.id)">
+        <div class="box" @mouseover="get_post_like_names(post.id)" @mouseleave="clear_post_like_names(post.id)">
           <div class="rows">
             <div class="row">
               {{post.content}}

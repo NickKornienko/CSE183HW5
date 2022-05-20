@@ -44,13 +44,19 @@ let init = (app) => {
         Vue.set(app.vue.post_disliked_by_user, post_id, is_disliked);
     };
 
+    app.clear_post_like_names = function (post_id) {
+        Vue.set(app.vue.post_like_names, post_id, "");
+        Vue.set(app.vue.post_dislike_names, post_id, "");
+    }
+
     app.get_post_like_names = function (post_id) {
         app.get_post_dislike_names(post_id);
 
         let likes = app.vue.post_likes[post_id];
 
         if (!likes) {
-            app.vue.post_like_names[post_id] = "";
+            Vue.set(app.vue.post_like_names, post_id, "");
+            // app.vue.post_like_names[post_id] = "";
             return;
         }
 
@@ -68,18 +74,21 @@ let init = (app) => {
         }
 
         if (post_like_names == "Liked by ") {
-            app.vue.post_like_names[post_id] = "";
+            Vue.set(app.vue.post_like_names, post_id, "");
+            //app.vue.post_like_names[post_id] = "";
             return;
         }
 
-        app.vue.post_like_names[post_id] = post_like_names;
+        Vue.set(app.vue.post_like_names, post_id, post_like_names);
+        // app.vue.post_like_names[post_id] = post_like_names;
     }
 
     app.get_post_dislike_names = function (post_id) {
         let likes = app.vue.post_likes[post_id];
 
         if (!likes) {
-            return "";
+            Vue.set(app.vue.post_dislike_names, post_id, "");
+            return;
         }
 
         let post_dislike_names = "Disliked by ";
@@ -96,10 +105,11 @@ let init = (app) => {
         }
 
         if (post_dislike_names == "Disliked by ") {
-            return "";
+            Vue.set(app.vue.post_dislike_names, post_id, "");
+            return;
         }
 
-        return post_dislike_names;
+        Vue.set(app.vue.post_dislike_names, post_id, post_dislike_names);
     }
 
 
@@ -211,7 +221,8 @@ let init = (app) => {
         dislike_post: app.dislike_post,
         liked: app.liked,
         get_post_like_names: app.get_post_like_names,
-        get_post_dislike_names: app.get_post_dislike_names
+        get_post_dislike_names: app.get_post_dislike_names,
+        clear_post_like_names: app.clear_post_like_names
     };
 
     // This creates the Vue instance.

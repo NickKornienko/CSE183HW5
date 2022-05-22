@@ -154,7 +154,8 @@ let init = (app) => {
 
         let likes = app.vue.post_likes[post_id];
         for (let i = 0; i < likes.length; i++) {
-            if (likes[i].post_id == post_id) {
+            if (likes[i].post_id == post_id &&
+                likes[i].user_email == app.vue.user_email) {
                 likes.splice(i, 1);
             }
         }
@@ -183,7 +184,8 @@ let init = (app) => {
 
         let likes = app.vue.post_likes[post_id];
         for (let i = 0; i < likes.length; i++) {
-            if (likes[i].post_id == post_id) {
+            if (likes[i].post_id == post_id &&
+                likes[i].user_email == app.vue.user_email) {
                 likes.splice(i, 1);
             }
         }

@@ -79,11 +79,12 @@ def like_post():
         post_id = db(db.posts.temp_id == post_id).select(db.posts.id)[0].id
 
     if remove:
-        db(db.likes.post_id == post_id and db.likes.user_email ==
-           get_user_email() and db.likes.is_like == "true").delete()
+        db((db.likes.post_id == post_id) & (db.likes.user_email ==
+           get_user_email()) & (db.likes.is_like == "true")).delete()
     else:
         db.likes.update_or_insert(
-            (db.likes.post_id == post_id),
+            ((db.likes.post_id == post_id) & (
+                db.likes.user_email == get_user_email())),
             post_id=post_id,
             name=get_user_name(),
             is_like="true"
@@ -104,11 +105,12 @@ def dislike_post():
         post_id = db(db.posts.temp_id == post_id).select(db.posts.id)[0].id
 
     if remove:
-        db(db.likes.post_id == post_id and db.likes.user_email ==
-           get_user_email() and db.likes.is_like == "false").delete()
+        db((db.likes.post_id == post_id) & (db.likes.user_email ==
+           get_user_email()) & (db.likes.is_like == "false")).delete()
     else:
         db.likes.update_or_insert(
-            (db.likes.post_id == post_id),
+            ((db.likes.post_id == post_id) & (
+                db.likes.user_email == get_user_email())),
             post_id=post_id,
             name=get_user_name(),
             is_like="false"

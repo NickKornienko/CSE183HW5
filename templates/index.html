@@ -13,27 +13,29 @@
     Postlandia
   </div>
 
-  <i v-if="post_open">
-    <div class="block">
-      <div class="field">
-        <p class="control">
-          <textarea class="textarea" placeholder="Type your post here" v-model="new_post"></textarea>
-        </p>
-      </div>
-      <button class="button is-primary" @click="add_post()">Post</button>
-      <button class="button is-warning" @click="cancel_post()">Cancel</button>
-    </div>
-  </i>
-
-  <i v-if="!post_open">
-    <div class="block">
-      <button class="button is-primary" @click="open_post()"><i class="fa fa-fw fa-plus"></i></button>
-    </div>
-  </i>
-
   <div class="container is-widescreen">
-    <div class="rows">
 
+    <div class="block">
+      <i v-if="post_open">
+        <div class="block">
+          <div class="field">
+            <p class="control">
+              <textarea class="textarea" placeholder="Type your post here" v-model="new_post"></textarea>
+            </p>
+          </div>
+          <button class="button is-primary" @click="add_post()">Post</button>
+          <button class="button is-warning" @click="cancel_post()">Cancel</button>
+        </div>
+      </i>
+
+      <i v-if="!post_open">
+        <div class="block">
+          <button class="button is-primary" @click="open_post()"><i class="fa fa-fw fa-plus"></i></button>
+        </div>
+      </i>
+    </div>
+
+    <div class="rows">
       <div v-for="post in posts.slice().reverse()" class="block">
         <div class="box" @mouseover="get_post_like_names(post.id)" @mouseleave="clear_post_like_names(post.id)">
           <div class="rows">
@@ -65,10 +67,15 @@
                 </div>
 
                 <div class="column">
-                  {{post_like_names[post.id]}}
-                  {{post_dislike_names[post.id]}}
+                  <div class="rows">
+                    <div class="row">
+                      {{post_like_names[post.id]}}
+                    </div>
+                    <div class="row">
+                      {{post_dislike_names[post.id]}}
+                    </div>
+                  </div>
                 </div>
-
                 <div class="column">
                   <i v-if="user_email == post.user_email" @click="del_post(post.id)">
                     <span class="icon">
